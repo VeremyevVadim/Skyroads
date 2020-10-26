@@ -12,6 +12,7 @@ public class GameMode : MonoBehaviour
 
     private bool _isGamePaused = false;
 
+    public UnityEvent StartGameEvent;
     public UnityEvent EndGameEvent;
 
     [SerializeField]
@@ -37,9 +38,10 @@ public class GameMode : MonoBehaviour
     private void Update()
     {
         // Waiting for a any key press to start the game
-        if (_isGamePaused && Input.anyKey)
+        if (_isGamePaused && Input.GetKey(KeyCode.Space))
         {
             PauseGame();
+            StartGameEvent?.Invoke();
             _uiController.OnGameStart();
         }
 

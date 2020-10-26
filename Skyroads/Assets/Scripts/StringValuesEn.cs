@@ -1,7 +1,7 @@
 ﻿public static class StringValuesEn
 {
     // UI string consts
-    public static string PRESS_ANY_KEY = "Press any key to start playing";
+    public static string PRESS_ANY_KEY = "Press SPACE to start playing";
     public static string GAME_SCORE = "Score: \n";
     public static string GAME_TIME = "Time: \n";
     public static string GAME_BEST_SCORE = "Best score: \n";
