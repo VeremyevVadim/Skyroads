@@ -5,12 +5,16 @@ using UnityEngine.Events;
 
 public class Ship : MonoBehaviour
 {
-    [SerializeField]
-    private float HorizontalSpeed = 1f;
+    [SerializeField] private float HorizontalSpeed = 1f;
 
-    [SerializeField]
-    private float _forwardSpeed = 1f;
+    [SerializeField] private float _forwardSpeed = 1f;
 
+    [SerializeField] private AudioSource audioSource = default;
+
+    [SerializeField] private AudioClip crashClip = default;
+
+    [SerializeField] private SoundController soundController = default;
+    
     // Returns x2 speed if Space bar pressed
     public float ForwardSpeed
     {
@@ -89,6 +93,10 @@ public class Ship : MonoBehaviour
 
     private void Crash()
     {
+        if (audioSource)
+        {
+            AudioSource.PlayClipAtPoint(crashClip, _transform.position, soundController.GetSoundVolume());
+        }
         CrashEvent.Invoke();
         Destroy(gameObject);
     }
@@ -98,6 +106,14 @@ public class Ship : MonoBehaviour
         if (collision.gameObject.CompareTag("Asteroid"))
         {
             Crash();
+        }
+    }
+
+    public void OnGameStart()
+    {
+        if (audioSource)
+        {
+            audioSource.Play();
         }
     }
 }

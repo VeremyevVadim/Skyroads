@@ -33,6 +33,7 @@ public class UIController : MonoBehaviour
 
     [SerializeField]
     private GameObject _scoreCounterObject = null;
+
     // _scoreCounter provides game state (current score, best score, number of asteroids passed and game time)
     private ScoreCounter _scoreCounter = null;
 
@@ -79,7 +80,7 @@ public class UIController : MonoBehaviour
         _endGamePanel.SetActive(false);
         _inGamePanel.SetActive(true);
     }
-
+    
     // Format time from float to MM:SS:mm format
     private string TimeToString(float time)
     {
