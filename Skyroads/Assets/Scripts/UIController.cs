@@ -91,7 +91,7 @@ public class UIController : MonoBehaviour
         return string.Format("{0:00}:{1:00}:{2:00}", minutes, seconds, milliseconds);
     }
 
-    public void SetGameValues(float time, float score, int asteroidCount, int bestScore)
+    private void SetGameValues(float time, float score, int asteroidCount, int bestScore)
     {
         _score.text = score.ToScoreString();
 

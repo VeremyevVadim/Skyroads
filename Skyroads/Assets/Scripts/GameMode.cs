@@ -4,33 +4,16 @@ using UnityEngine.SceneManagement;
 
 public class GameMode : MonoBehaviour
 {
-    public static float RoadWidth = 8f;
-    public static float FlyHeight = 1.5f;
-    public static int PointsPerSecond = 1;
-    public static int PointsPerAsteroid = 5;
-    public static int AsteroidsToLvlUp = 20;
-
-    private bool _isGamePaused = false;
+    [SerializeField]
+    private UIController _uiController;
 
     public UnityEvent StartGameEvent;
     public UnityEvent EndGameEvent;
 
-    [SerializeField]
-    private Canvas _canvas = null;
-
-    private UIController _uiController;
-
-    // Method for ship CrashEvent
-    public void OnCrash()
-    {
-        _uiController.OnGameEnd();
-        Time.timeScale = 0;
-        EndGameEvent.Invoke();
-    }
+    private bool _isGamePaused = false;
 
     private void Start()
     {
-        _uiController = _canvas.GetComponent<UIController>();
         _uiController.OnGameLoad();
         PauseGame();
     }
@@ -49,6 +32,12 @@ public class GameMode : MonoBehaviour
         { 
             Application.Quit();
         }
+    }
+    public void OnCrash()
+    {
+        _uiController.OnGameEnd();
+        Time.timeScale = 0;
+        EndGameEvent.Invoke();
     }
 
     private void PauseGame()

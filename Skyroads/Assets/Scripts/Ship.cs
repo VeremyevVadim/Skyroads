@@ -1,63 +1,49 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using Settings;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class Ship : MonoBehaviour
 {
-    [SerializeField] private float HorizontalSpeed = 1f;
+    [SerializeField]
+    private ShipSettings _shipSettings;
 
-    [SerializeField] private float _forwardSpeed = 1f;
+    [SerializeField]
+    private LevelSettings _levelSettings;
 
-    [SerializeField] private AudioSource audioSource = default;
+    [SerializeField]
+    private Rigidbody _rigidbody;
 
-    [SerializeField] private AudioClip crashClip = default;
+    [SerializeField]
+    private AudioSource _audioSource;
 
-    [SerializeField] private SoundController soundController = default;
-    
-    // Returns x2 speed if Space bar pressed
-    public float ForwardSpeed
-    {
-        get
-        {
-            if (IsSpeedUp)
-                return Mathf.Round(2 * _forwardSpeed);
-            else
-                return _forwardSpeed;
-        }
-    }
-    
+    [SerializeField]
+    private AudioClip _crashClip;
+
+    [SerializeField]
+    private SoundController _soundController ;
+
+    // Returns TurboSpeed if Space bar pressed
+    public float ForwardSpeed => IsSpeedUp ? _shipSettings.TurboSpeed : _shipSettings.ForwardSpeed;
     public bool IsSpeedUp { get; private set; } = false;
 
     public UnityEvent CrashEvent;
 
-    private const float _rotationPower = 3;
     private float _roadHalfWidth;
-
-    private Rigidbody _rb;
     private Transform _transform;
 
     private void Start()
     {
-        _rb = GetComponent<Rigidbody>();
-        _transform = GetComponent<Transform>();
+        _transform = transform;
 
-        // Set flight height
-        _transform.position = new Vector3(_transform.position.x, GameMode.FlyHeight, _transform.position.z);
-
-        _roadHalfWidth = GameMode.RoadWidth / 2;
+        _transform.position = new Vector3(_transform.position.x, _levelSettings.FlyHeight, _transform.position.z);
+        _roadHalfWidth = _levelSettings.RoadWidth / 2;
     }
 
     private void FixedUpdate()
     {
-        // Player left/right movement
         Move();
-
-        // Set x2 speed if space bar pressed 
         SpeedUp();
-
-        // Tilt the ship in the movement direction 
-        _transform.rotation = Quaternion.Euler(0, 0, -_rb.velocity.x * _rotationPower);
+        _transform.rotation = Quaternion.Euler(0, 0, -_rigidbody.linearVelocity.x * _shipSettings.RotationPower);
     }
 
     private Vector3 _movementVector
@@ -71,12 +57,11 @@ public class Ship : MonoBehaviour
 
     private void Move()
     {
-        float xPosition = _transform.position.x;
-        float xDirection = _movementVector.x;
+        var xPosition = _transform.position.x;
+        var xDirection = _movementVector.x;
 
-        // Position.X restrictions
         if ((xPosition < _roadHalfWidth && xDirection > 0) || (xPosition > -_roadHalfWidth && xDirection < 0))
-            _rb.AddForce(_movementVector * HorizontalSpeed, ForceMode.VelocityChange);
+            _rigidbody.AddForce(_movementVector * _shipSettings.HorizontalSpeed, ForceMode.VelocityChange);
     }
 
     private void SpeedUp()
@@ -93,17 +78,18 @@ public class Ship : MonoBehaviour
 
     private void Crash()
     {
-        if (audioSource)
+        if (_audioSource)
         {
-            AudioSource.PlayClipAtPoint(crashClip, _transform.position, soundController.GetSoundVolume());
+            AudioSource.PlayClipAtPoint(_crashClip, _transform.position, _soundController.GetSoundVolume());
         }
+
         CrashEvent.Invoke();
         Destroy(gameObject);
     }
 
-    private void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter(Collider collider)
     {
-        if (collision.gameObject.CompareTag("Asteroid"))
+        if (collider.gameObject.CompareTag("Asteroid"))
         {
             Crash();
         }
@@ -111,9 +97,9 @@ public class Ship : MonoBehaviour
 
     public void OnGameStart()
     {
-        if (audioSource)
+        if (_audioSource)
         {
-            audioSource.Play();
+            _audioSource.Play();
         }
     }
 }

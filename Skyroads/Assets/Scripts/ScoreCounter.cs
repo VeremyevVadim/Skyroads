@@ -1,13 +1,16 @@
-﻿using System;
+﻿using Settings;
 using UnityEngine;
 
 public class ScoreCounter : MonoBehaviour
 {
     [SerializeField]
-    private Ship _ship = null;
+    private Ship _ship;
     
     [SerializeField]
-    private AsteroidSpawner _spawner = null;
+    private AsteroidSpawner _spawner;
+
+    [SerializeField]
+    private LevelSettings _levelSettings;
 
     private float _startGameTime;
     private float _gameTime = 0;
@@ -20,17 +23,10 @@ public class ScoreCounter : MonoBehaviour
     public float GameTime { get { return _gameTime - _startGameTime; } }
     public bool IsBestScoreBeaten { get; private set; } = false;
 
-    private int _asteroidsToLevelUp;
-    private int _pointPerSecond;
-    private int _pointPerAsteroid;
     private int _lastLevelUpAsteroidCount = 0;
 
     private void Start()
     {
-        _asteroidsToLevelUp = GameMode.AsteroidsToLvlUp;
-        _pointPerSecond = GameMode.PointsPerSecond;
-        _pointPerAsteroid = GameMode.PointsPerAsteroid;
-
         if (!PlayerPrefs.HasKey(StringValuesEn.PLAYER_PREFS_BEST_SCORE))
         {  
             PlayerPrefs.SetInt(StringValuesEn.PLAYER_PREFS_BEST_SCORE, 0);
@@ -47,17 +43,15 @@ public class ScoreCounter : MonoBehaviour
     private void Update()
     {
         _gameTime += Time.deltaTime;
-        _score += (_ship.IsSpeedUp ? Time.deltaTime * 2 : Time.deltaTime) * _pointPerSecond;
+        _score += ( Time.deltaTime * _ship.ForwardSpeed) * _levelSettings.PointsGainPerSecond;
 
-        // Update best score
         if (_score > BestScore)
         {
             BestScore = Mathf.RoundToInt(_score);
             IsBestScoreBeaten = true;
         }
 
-        // LevelUp asteroid spawner
-        if (Asteroids > _lastLevelUpAsteroidCount && Asteroids % _asteroidsToLevelUp == 0)
+        if (Asteroids > _lastLevelUpAsteroidCount && Asteroids % _levelSettings.AsteroidsToLvlUp == 0)
         {
             _spawner.LevelUp();
             _lastLevelUpAsteroidCount = Asteroids;
@@ -66,13 +60,13 @@ public class ScoreCounter : MonoBehaviour
 
     private void AsteroidDodge()
     {
-        _score += _pointPerAsteroid;
+        _score += _levelSettings.PointsGainPerAsteroid;
         Asteroids++;
     }
 
-    private void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter(Collider collider)
     {
-        if (collision.gameObject.CompareTag("Asteroid"))
+        if (collider.gameObject.CompareTag("Asteroid"))
         {
             AsteroidDodge();
         }

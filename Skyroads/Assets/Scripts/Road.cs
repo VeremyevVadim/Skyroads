@@ -3,19 +3,14 @@
 public class Road : MonoBehaviour
 {
     [SerializeField]
-    private Ship Ship = null;
+    private Ship Ship;
 
+    [SerializeField]
     private Animator _animator;
 
-    private void Start()
-    {
-        _animator = GetComponent<Animator>();
-    }
-
-    // Move road with ship forward speed
     private void FixedUpdate()
     {
-        if (!Ship)
+        if (Ship == null)
         {
             return;
         }

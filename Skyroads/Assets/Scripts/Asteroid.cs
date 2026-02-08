@@ -1,46 +1,69 @@
-﻿using UnityEngine;
+﻿using Settings;
+using System;
+using UnityEngine;
 
 public class Asteroid : MonoBehaviour
 {
     [SerializeField]
-    [Tooltip("Degrees per second")]
-    private float _rotationSpeed = 180;
+    private AsteroidSettings _asteroidSettings;
 
     [SerializeField]
-    private Ship _ship = null;
+    private MeshRenderer _meshRenderer;
 
-    private Transform _transform;
+    [SerializeField]
+    private MeshCollider _meshCollider;
 
-    private const float _speedCoefficient = 40;
+    public event Action<Asteroid> Destroyed;
 
-    private void Start()
+    private Ship _ship;
+    private bool _isActive;
+
+    public void Initialize(Ship ship)
     {
-        _ship = FindObjectOfType<Ship>();
-        _transform = GetComponent<Transform>();
+        _ship = ship;
     }
 
-    private void Update()
+    public void SetActive(bool isActive)
     {
-        Quaternion rotationY = Quaternion.AngleAxis(_rotationSpeed * Time.unscaledDeltaTime, Vector3.up);
+        _meshRenderer.enabled = isActive;
+        _meshCollider.enabled = isActive;
+        _isActive = isActive;
+    }
+
+    public void SetPosition(Vector3 position)
+    {
+        transform.localPosition = position;
+        transform.rotation = Quaternion.AngleAxis(0f, Vector3.up);
+    }
+
+    public void Tick(float deltaTime)
+    {
+        if (!_isActive)
+        {
+            return;
+        }
+
+        var rotationY = Quaternion.AngleAxis(_asteroidSettings.RotationSpeed * deltaTime, Vector3.up);
         transform.rotation *= rotationY;
-        
-        // Move with ship forward speed
-        if(_ship != null)
-            _transform.Translate( new Vector3(0, 0, - Time.deltaTime * (_ship.ForwardSpeed * _speedCoefficient)), Space.World);
+
+        if (_ship != null)
+        {
+            transform.position += new Vector3(0, 0, -deltaTime * (_asteroidSettings.ForwardSpeed * _ship.ForwardSpeed));
+        }
     }
 
-    private void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter(Collider collider)
     {
-        switch (collision.gameObject.tag)
+        switch (collider.gameObject.tag)
         {
             case "Catcher":
-                Destroy(gameObject);
+                Destroyed?.Invoke(this);
                 break;
             case "Path":
-                Destroy(gameObject);
+                Destroyed?.Invoke(this);
                 break;
             case "Asteroid":
-                Destroy(gameObject);
+                Destroyed?.Invoke(this);
                 break;
             default:
                 return;
